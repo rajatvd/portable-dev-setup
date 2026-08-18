@@ -77,13 +77,15 @@ make install-linux
 
 ## Offline bundle
 
-From a clean recursive clone:
+From a clean recursive clone with Python 3 available:
 
 ```sh
 make bundle
 ```
 
-This creates `dist/portable-dev-setup-1.0.0.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all required shell and Neovim snapshots, their licenses, and the complete runtime payload.
+Python 3 is a maintainer-only bundle-build requirement. Installing and running a downloaded bundle remains Bash/POSIX-only and does not invoke Python.
+
+This creates `dist/portable-dev-setup-1.0.0.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all required shell and Neovim snapshots, their licenses, and the complete runtime payload. Archive ordering, timestamps, ownership, modes, and gzip metadata are canonicalized from the exact source commit so repeated builds produce identical files.
 
 After downloading both files, verify and install without network access:
 
@@ -102,10 +104,10 @@ On Linux, `sha256sum -c` can be used for the outer checksum.
 ```sh
 make test          # structure, pins, profiles, backups, and shared payload
 make prove         # isolated install plus bounded real zsh/Neovim assertions
-make prove-bundle  # checksum, fresh extraction, isolated reinstall, and startup proof
+make prove-bundle  # two-build byte proof, checksums, extraction, reinstall, and startup
 ```
 
-The pinned Linux and macOS jobs assert source-backed settings and mappings, every included plugin module or command, completion sources, native LSP initialization with all server executables absent, clean exit, and the full extracted-bundle reinstall path.
+The pinned Linux and macOS jobs assert source-backed settings and mappings, every included plugin module or command, completion sources, native LSP initialization with all server executables absent, clean exit, two-build bundle reproducibility, canonical archive metadata, and the full extracted-bundle reinstall path.
 
 ## Licensing
 

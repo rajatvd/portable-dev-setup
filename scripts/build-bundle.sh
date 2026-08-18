@@ -29,15 +29,20 @@ sha256_file() {
 }
 
 command -v git >/dev/null 2>&1 || fail 'git is required'
+command -v python3 >/dev/null 2>&1 || fail 'python3 is required to build the bundle'
 command -v tar >/dev/null 2>&1 || fail 'tar is required'
 git -C "$repo_root" diff --quiet || fail 'tracked files have unstaged changes'
 git -C "$repo_root" diff --cached --quiet || fail 'the index has uncommitted changes'
 [[ -z "$(git -C "$repo_root" ls-files --others --exclude-standard)" ]] || fail 'untracked files are present'
 
+source_commit=$(git -C "$repo_root" rev-parse --verify HEAD)
+source_epoch=$(git -C "$repo_root" show -s --format=%ct "$source_commit")
+[[ "$source_epoch" =~ ^[0-9]+$ ]] || fail "invalid source commit epoch: $source_epoch"
+
 stage=$(mktemp -d "${TMPDIR:-/tmp}/portable-dev-setup-bundle.XXXXXX")
 package_root=$stage/$package
 mkdir -p "$package_root" "$dist"
-git -C "$repo_root" archive --format=tar HEAD | tar -xf - -C "$package_root"
+git -C "$repo_root" archive --format=tar "$source_commit" | tar -xf - -C "$package_root"
 
 while IFS=$'\t' read -r path commit kind url license; do
   [[ -n "$path" && ${path:0:1} != '#' ]] || continue
@@ -71,7 +76,7 @@ done < "$repo_root/vendor/LOCK.tsv"
 archive=$dist/$package.tar.gz
 checksum=$archive.sha256
 rm -f "$archive" "$checksum"
-COPYFILE_DISABLE=1 tar -czf "$archive" -C "$stage" "$package"
+python3 "$repo_root/scripts/write-reproducible-archive.py" "$package_root" "$archive" "$source_epoch"
 printf '%s  ./%s\n' "$(sha256_file "$archive")" "$(basename -- "$archive")" > "$checksum"
 chmod 0644 "$archive" "$checksum"
 printf 'Created %s\nCreated %s\n' "$archive" "$checksum"

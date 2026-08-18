@@ -12,9 +12,23 @@ fail() {
   exit 1
 }
 
-"$repo_root/scripts/build-bundle.sh" > "$proof_root/build.out"
 archive=$repo_root/dist/$package.tar.gz
 outer_manifest=$archive.sha256
+first_archive=$proof_root/first-$package.tar.gz
+first_manifest=$first_archive.sha256
+
+"$repo_root/scripts/build-bundle.sh" > "$proof_root/first-build.out"
+cp "$archive" "$first_archive"
+cp "$outer_manifest" "$first_manifest"
+sleep 2
+"$repo_root/scripts/build-bundle.sh" > "$proof_root/second-build.out"
+cmp "$first_archive" "$archive" >/dev/null || fail 'two builds produced different archives'
+cmp "$first_manifest" "$outer_manifest" >/dev/null || fail 'two builds produced different outer checksum files'
+source_epoch=$(git -C "$repo_root" show -s --format=%ct HEAD)
+python3 "$repo_root/tests/verify-bundle-metadata.py" "$archive" "$package" "$source_epoch"
+archive_hash=$(awk 'NR == 1 { print $1 }' "$outer_manifest")
+printf 'Two-build reproducibility proof passed: %s\n' "$archive_hash"
+
 "$repo_root/scripts/verify-checksums.sh" "$outer_manifest" "$repo_root/dist" > "$proof_root/outer-check.out"
 tar -xzf "$archive" -C "$proof_root"
 package_root=$proof_root/$package
