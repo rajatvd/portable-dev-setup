@@ -1,0 +1,8 @@
+# path	commit	kind	url	license
+vendor/oh-my-zsh	0912e05c0589d26ea20d79555487900880aad4d5	shell	https://github.com/ohmyzsh/ohmyzsh.git	LICENSE.txt
+vendor/powerlevel10k	d71edb83f9c7f045a0d528eeff3445ec3d518d71	shell	https://github.com/romkatv/powerlevel10k.git	LICENSE
+vendor/zsh-autosuggestions	c3d4e576c9c86eac62884bd47c01f6faed043fc5	shell	https://github.com/zsh-users/zsh-autosuggestions.git	LICENSE
+vendor/zsh-syntax-highlighting	e0165eaa730dd0fa321a6a6de74f092fe87630b0	shell	https://github.com/zsh-users/zsh-syntax-highlighting.git	COPYING.md
+vendor/nvim-plugins/vim-commentary	64a654ef4a20db1727938338310209b6a63f60c9	nvim	https://github.com/tpope/vim-commentary.git	README.markdown
+vendor/nvim-plugins/vim-surround	3d188ed2113431cf8dac77be61b842acb64433d9	nvim	https://github.com/tpope/vim-surround.git	README.markdown
+vendor/nvim-plugins/vim-fugitive	3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0	nvim	https://github.com/tpope/vim-fugitive.git	README.markdown

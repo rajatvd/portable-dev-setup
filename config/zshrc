@@ -1,0 +1,17 @@
+export ZSH="${XDG_DATA_HOME:-$HOME/.local/share}/portable-dev-setup/oh-my-zsh"
+export ZSH_CUSTOM="$ZSH/custom"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh"
+
+zstyle ':omz:update' mode disabled
+typeset -g POWERLEVEL9K_DISABLE_GITSTATUS=true
+ZSH_THEME="powerlevel10k/powerlevel10k"
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
+source "$ZSH/oh-my-zsh.sh"
+[[ ! -r "$HOME/.p10k.zsh" ]] || source "$HOME/.p10k.zsh"
+
+alias zshconfig='nvim "$HOME/.zshrc"'
+alias nvconfig='nvim "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"'
+
+# This is the only machine-local extension point. It is never managed here.
+[[ ! -r "$HOME/.zshrc.local" ]] || source "$HOME/.zshrc.local"

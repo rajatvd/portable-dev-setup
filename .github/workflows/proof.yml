@@ -1,0 +1,44 @@
+name: portable runtime proof
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact repository graph
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          submodules: recursive
+      - name: Provide zsh
+        run: sudo apt-get update && sudo apt-get install --yes zsh
+      - name: Provide pinned Neovim
+        uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7
+        with:
+          neovim: true
+          version: v0.10.4
+      - name: Structural, installed-runtime, and offline-bundle proofs
+        run: make ci
+
+  macos-proof:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact repository graph
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          submodules: recursive
+      - name: Provide pinned Neovim
+        uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7
+        with:
+          neovim: true
+          version: v0.10.4
+      - name: Structural, installed-runtime, and offline-bundle proofs
+        run: make ci
