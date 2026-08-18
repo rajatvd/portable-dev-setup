@@ -116,12 +116,31 @@ run_install() {
   assert_file "$data_home/portable-dev-setup/oh-my-zsh/custom/themes/powerlevel10k/powerlevel10k.zsh-theme"
   assert_file "$data_home/portable-dev-setup/oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
   assert_file "$data_home/portable-dev-setup/oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  assert_file "$data_home/nvim/site/pack/portable/start/vim-commentary/plugin/commentary.vim"
-  assert_file "$data_home/nvim/site/pack/portable/start/vim-surround/plugin/surround.vim"
-  assert_file "$data_home/nvim/site/pack/portable/start/vim-fugitive/plugin/fugitive.vim"
+  local plugin_file
+  for plugin_file in \
+    vim-commentary/plugin/commentary.vim \
+    vim-surround/plugin/surround.vim \
+    vim-fugitive/plugin/fugitive.vim \
+    nvim-cmp/lua/cmp/init.lua \
+    cmp-nvim-lsp/lua/cmp_nvim_lsp/init.lua \
+    cmp-buffer/lua/cmp_buffer/init.lua \
+    cmp-path/lua/cmp_path/init.lua \
+    luasnip/lua/luasnip/init.lua \
+    cmp_luasnip/lua/cmp_luasnip/init.lua \
+    plenary.nvim/lua/plenary/init.lua \
+    telescope.nvim/lua/telescope/init.lua \
+    oil.nvim/lua/oil/init.lua \
+    leap.nvim/lua/leap/init.lua \
+    which-key.nvim/lua/which-key/init.lua \
+    nvim-web-devicons/lua/nvim-web-devicons.lua; do
+    assert_file "$data_home/nvim/site/pack/portable/start/$plugin_file"
+  done
   assert_contains "$home/.zshrc.local" 'local seam'
   assert_absent "$config_home/nvim/.git"
-  assert_absent "$data_home/nvim/site/pack/portable/start/vim-fugitive/.git"
+  if find "$data_home/nvim/site/pack/portable" -name .git -print | grep -q .; then
+    fail "$profile installed plugin Git metadata"
+  fi
+  assert_absent "$data_home/nvim/site/pack/portable/start/luasnip/deps"
 
   backup_parent=$state_home/portable-dev-setup/backups
   set -- "$backup_parent"/*
@@ -184,6 +203,10 @@ printf '%s\n' '[6/6] package safety shape'
 if grep -RInE 'curl|wget|PlugInstall|git[[:space:]]+clone' "$repo_root/nvim" "$repo_root/install.sh" > "$test_root/network-hits"; then
   cat "$test_root/network-hits" >&2
   fail 'runtime or installer contains a network bootstrap path'
+fi
+if grep -RInEi '(mason|copilot|octo|orgmode|thesis|ipython|tmux|mpv|rsync|cuda|treesitter)' "$repo_root/nvim" > "$test_root/excluded-feature-hits"; then
+  cat "$test_root/excluded-feature-hits" >&2
+  fail 'excluded personal, host-specific, account, or parser behavior is present'
 fi
 if grep -InE 'sudo[[:space:]]|brew[[:space:]]+(install|update)|apt(-get)?[[:space:]]|yum[[:space:]]|dnf[[:space:]]|pacman[[:space:]]|cmake[[:space:]]|ninja[[:space:]]' \
   "$repo_root/install.sh" > "$test_root/host-mutation-hits"; then

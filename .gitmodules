@@ -19,3 +19,39 @@
 [submodule "vendor/nvim-plugins/vim-fugitive"]
 	path = vendor/nvim-plugins/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
+[submodule "vendor/nvim-plugins/nvim-cmp"]
+	path = vendor/nvim-plugins/nvim-cmp
+	url = https://github.com/hrsh7th/nvim-cmp.git
+[submodule "vendor/nvim-plugins/cmp-nvim-lsp"]
+	path = vendor/nvim-plugins/cmp-nvim-lsp
+	url = https://github.com/hrsh7th/cmp-nvim-lsp.git
+[submodule "vendor/nvim-plugins/cmp-buffer"]
+	path = vendor/nvim-plugins/cmp-buffer
+	url = https://github.com/hrsh7th/cmp-buffer.git
+[submodule "vendor/nvim-plugins/cmp-path"]
+	path = vendor/nvim-plugins/cmp-path
+	url = https://github.com/hrsh7th/cmp-path.git
+[submodule "vendor/nvim-plugins/luasnip"]
+	path = vendor/nvim-plugins/luasnip
+	url = https://github.com/L3MON4D3/LuaSnip.git
+[submodule "vendor/nvim-plugins/cmp_luasnip"]
+	path = vendor/nvim-plugins/cmp_luasnip
+	url = https://github.com/saadparwaiz1/cmp_luasnip.git
+[submodule "vendor/nvim-plugins/plenary.nvim"]
+	path = vendor/nvim-plugins/plenary.nvim
+	url = https://github.com/nvim-lua/plenary.nvim.git
+[submodule "vendor/nvim-plugins/telescope.nvim"]
+	path = vendor/nvim-plugins/telescope.nvim
+	url = https://github.com/nvim-telescope/telescope.nvim.git
+[submodule "vendor/nvim-plugins/oil.nvim"]
+	path = vendor/nvim-plugins/oil.nvim
+	url = https://github.com/stevearc/oil.nvim.git
+[submodule "vendor/nvim-plugins/leap.nvim"]
+	path = vendor/nvim-plugins/leap.nvim
+	url = https://github.com/ggandor/leap.nvim.git
+[submodule "vendor/nvim-plugins/which-key.nvim"]
+	path = vendor/nvim-plugins/which-key.nvim
+	url = https://github.com/folke/which-key.nvim.git
+[submodule "vendor/nvim-plugins/nvim-web-devicons"]
+	path = vendor/nvim-plugins/nvim-web-devicons
+	url = https://github.com/nvim-tree/nvim-web-devicons.git

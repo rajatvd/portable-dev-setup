@@ -6,3 +6,15 @@ vendor/zsh-syntax-highlighting	e0165eaa730dd0fa321a6a6de74f092fe87630b0	shell	ht
 vendor/nvim-plugins/vim-commentary	64a654ef4a20db1727938338310209b6a63f60c9	nvim	https://github.com/tpope/vim-commentary.git	README.markdown
 vendor/nvim-plugins/vim-surround	3d188ed2113431cf8dac77be61b842acb64433d9	nvim	https://github.com/tpope/vim-surround.git	README.markdown
 vendor/nvim-plugins/vim-fugitive	3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0	nvim	https://github.com/tpope/vim-fugitive.git	README.markdown
+vendor/nvim-plugins/nvim-cmp	2ffe79f1f021def8dd1fcd81deb16f1bb0d989f3	nvim	https://github.com/hrsh7th/nvim-cmp.git	LICENSE
+vendor/nvim-plugins/cmp-nvim-lsp	cbc7b02bb99fae35cb42f514762b89b5126651ef	nvim	https://github.com/hrsh7th/cmp-nvim-lsp.git	LICENSE
+vendor/nvim-plugins/cmp-buffer	b74fab3656eea9de20a9b8116afa3cfc4ec09657	nvim	https://github.com/hrsh7th/cmp-buffer.git	LICENSE
+vendor/nvim-plugins/cmp-path	c642487086dbd9a93160e1679a1327be111cbc25	nvim	https://github.com/hrsh7th/cmp-path.git	LICENSE
+vendor/nvim-plugins/luasnip	642b0c595e11608b4c18219e93b88d7637af27bc	nvim	https://github.com/L3MON4D3/LuaSnip.git	LICENSE
+vendor/nvim-plugins/cmp_luasnip	98d9cb5c2c38532bd9bdb481067b20fea8f32e90	nvim	https://github.com/saadparwaiz1/cmp_luasnip.git	LICENSE
+vendor/nvim-plugins/plenary.nvim	74b06c6c75e4eeb3108ec01852001636d85a932b	nvim	https://github.com/nvim-lua/plenary.nvim.git	LICENSE
+vendor/nvim-plugins/telescope.nvim	a0bbec21143c7bc5f8bb02e0005fa0b982edc026	nvim	https://github.com/nvim-telescope/telescope.nvim.git	LICENSE
+vendor/nvim-plugins/oil.nvim	b73018b75affd13fa38e2fc94ef753b465f770d7	nvim	https://github.com/stevearc/oil.nvim.git	LICENSE
+vendor/nvim-plugins/leap.nvim	1fc7f38b69cc4644505e3ff74ba69b1682a85dd9	nvim	https://github.com/ggandor/leap.nvim.git	LICENSE.md
+vendor/nvim-plugins/which-key.nvim	3aab2147e74890957785941f0c1ad87d0a44c15a	nvim	https://github.com/folke/which-key.nvim.git	LICENSE
+vendor/nvim-plugins/nvim-web-devicons	2ae6958df7ced50baac5035cec0c15799eedfbf7	nvim	https://github.com/nvim-tree/nvim-web-devicons.git	LICENSE

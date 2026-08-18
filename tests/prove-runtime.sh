@@ -81,11 +81,15 @@ run_bounded 30 "$proof_root/zsh.out" "$proof_root/zsh.err" \
 grep -Fq 'zsh runtime assertions passed' "$proof_root/zsh.out" || fail 'zsh assertions did not finish'
 
 lua_assertions=$repo_root/tests/nvim_assertions.lua
+nvim_bin=$(command -v nvim)
+mkdir -p "$proof_root/nvim-bin"
+ln -s "$nvim_bin" "$proof_root/nvim-bin/nvim"
 run_bounded 30 "$proof_root/nvim.out" "$proof_root/nvim.err" \
   env HOME="$home" XDG_CONFIG_HOME="$config_home" XDG_DATA_HOME="$data_home" XDG_STATE_HOME="$state_home" \
+  PATH="$proof_root/nvim-bin" \
   nvim --headless --cmd 'set shortmess+=I' "+lua dofile([[$lua_assertions]])" +qa
-if ! grep -Fq 'Neovim runtime assertions passed.' "$proof_root/nvim.out" && \
-   ! grep -Fq 'Neovim runtime assertions passed.' "$proof_root/nvim.err"; then
+if ! grep -Fq 'Expanded Neovim runtime assertions passed.' "$proof_root/nvim.out" && \
+   ! grep -Fq 'Expanded Neovim runtime assertions passed.' "$proof_root/nvim.err"; then
   cat "$proof_root/nvim.out" >&2 || true
   cat "$proof_root/nvim.err" >&2 || true
   fail 'Neovim assertions did not finish'

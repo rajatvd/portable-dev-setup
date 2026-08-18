@@ -106,8 +106,8 @@ check_host() {
     require_command "$name"
   done
   zsh -fc 'autoload -Uz is-at-least; is-at-least 5.1' || fail 'zsh 5.1 or newer is required'
-  nvim --clean --headless -u NONE "+if !has('nvim-0.9') | cquit 1 | endif" +qa >/dev/null 2>&1 || \
-    fail 'Neovim 0.9 or newer is required'
+  nvim --clean --headless -u NONE "+if !has('nvim-0.10') | cquit 1 | endif" +qa >/dev/null 2>&1 || \
+    fail 'Neovim 0.10 or newer is required'
 }
 
 check_dependencies() {
@@ -138,9 +138,13 @@ verify_bundle_if_present() {
 copy_snapshot() {
   local source=$1
   local destination=$2
+  local git_metadata
   mkdir -p "$destination"
   cp -R "$source"/. "$destination"/
-  rm -rf "$destination/.git" "$destination/.portable-revision"
+  while IFS= read -r git_metadata; do
+    rm -rf "$git_metadata"
+  done < <(find "$destination" -name .git -print)
+  rm -f "$destination/.portable-revision" "$destination/.gitmodules"
 }
 
 select_profile
@@ -198,6 +202,9 @@ while IFS=$'\t' read -r path commit kind url license; do
   [[ "$kind" == nvim ]] || continue
   name=${path##*/}
   copy_snapshot "$repo_root/$path" "$staging_root/nvim-pack/start/$name"
+  if [[ "$name" == luasnip ]]; then
+    rm -rf "$staging_root/nvim-pack/start/$name/deps"
+  fi
 done < "$repo_root/vendor/LOCK.tsv"
 
 cp "$repo_root/config/zshrc" "$staging_root/zshrc"

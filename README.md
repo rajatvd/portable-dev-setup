@@ -1,6 +1,6 @@
 # Portable zsh and Neovim setup
 
-A host-neutral zsh, Powerlevel10k, and Neovim package for macOS and Linux. Both profiles install the same payload; profile selection only validates `uname -s` and makes the target explicit.
+A host-neutral zsh, Powerlevel10k, and source-backed Neovim package for macOS and Linux. Both profiles install the same payload; profile selection only validates `uname -s` and makes the target explicit.
 
 ## What it installs
 
@@ -11,13 +11,39 @@ A host-neutral zsh, Powerlevel10k, and Neovim package for macOS and Linux. Both 
 
 Existing managed targets are moved first to `${XDG_STATE_HOME:-$HOME/.local/state}/portable-dev-setup/backups/<timestamp>-<process-id>/`. The installer never changes the login shell and never touches `~/.zshrc.local`; that ignored file is the only machine-local extension point.
 
+## Neovim features
+
+The configuration preserves the portable editor behavior behind this distribution:
+
+- relative and absolute line numbers, four-space indentation, persistent XDG undo, wrapped text, centered scrolling, quickfix navigation, and an 88-column guide;
+- source-backed save, escape, window, line-motion, tag, command-line, terminal, and quickfix mappings;
+- native Neovim LSP startup for Python, C, C++, and Lua;
+- `nvim-cmp` with LSP, buffer, path, and LuaSnip completion sources;
+- Telescope with plenary and a file-finder mapping;
+- Oil as the directory editor;
+- Leap motions;
+- Which-Key and nvim-web-devicons;
+- vim-fugitive, vim-commentary, and the source-backed vim-surround mappings.
+
+No Mason, Treesitter, Copilot, Octo, account integration, project state, calendar/org tooling, remote-sync workflow, media/render workflow, or host scheduler/toolchain configuration is included.
+
+### Language-server boundary
+
+Language servers are optional host prerequisites, never managed dependencies:
+
+- Python: `pyright-langserver`, falling back to `pylsp`
+- C and C++: `clangd`
+- Lua: `lua-language-server`
+
+The configuration checks `PATH` when a matching filetype opens. If no server executable is present, startup remains clean and no client is started. The installer and Neovim configuration never install or download a language server.
+
 ## Requirements
 
 The host must already provide:
 
 - Bash, Git, Make, and standard POSIX userland tools
 - zsh 5.1 or newer
-- Neovim 0.9 or newer
+- Neovim 0.10 or newer
 - a Nerd Font for the intended terminal
 
 The installer does not elevate privileges, invoke a host package manager, build software, access credentials, or use the network. Dependencies are exact public snapshots. Neovim plugins are copied during installation, so the first editor launch cannot trigger a download. Powerlevel10k's optional gitstatus helper is disabled; VCS prompt information uses the built-in zsh backend without fetching a binary.
@@ -57,7 +83,7 @@ From a clean recursive clone:
 make bundle
 ```
 
-This creates `dist/portable-dev-setup-1.0.0.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all submodules, including licenses and the complete shell and Neovim runtime payload.
+This creates `dist/portable-dev-setup-1.0.0.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all required shell and Neovim snapshots, their licenses, and the complete runtime payload.
 
 After downloading both files, verify and install without network access:
 
@@ -75,11 +101,11 @@ On Linux, `sha256sum -c` can be used for the outer checksum.
 
 ```sh
 make test          # structure, pins, profiles, backups, and shared payload
-make prove         # isolated install plus bounded real zsh/Neovim startup assertions
-make prove-bundle  # checksum, fresh extraction, isolated install, and startup proof
+make prove         # isolated install plus bounded real zsh/Neovim assertions
+make prove-bundle  # checksum, fresh extraction, isolated reinstall, and startup proof
 ```
 
-The GitHub Actions workflow runs all three proofs as separate pinned Linux and macOS jobs. Neovim assertions cover startup completion, settings, mappings, all three pinned plugins, and clean headless exit.
+The pinned Linux and macOS jobs assert source-backed settings and mappings, every included plugin module or command, completion sources, native LSP initialization with all server executables absent, clean exit, and the full extracted-bundle reinstall path.
 
 ## Licensing
 
