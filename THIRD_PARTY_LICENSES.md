@@ -1,6 +1,6 @@
 # Third-party components
 
-The main project is distributed under the MIT License. The exact third-party snapshots below remain under their own licenses. A recursive source clone contains each complete license file at the listed path; offline bundles materialize the same files.
+The main project is distributed under the MIT License. The exact third-party snapshots below remain under their own licenses. The repository contains each complete license file at the listed path; offline bundles materialize the same files.
 
 | Component | Exact commit | License file |
 | --- | --- | --- |
@@ -23,9 +23,10 @@ The main project is distributed under the MIT License. The exact third-party sna
 | leap.nvim | `1fc7f38b69cc4644505e3ff74ba69b1682a85dd9` | `vendor/nvim-plugins/leap.nvim/LICENSE.md` |
 | which-key.nvim | `3aab2147e74890957785941f0c1ad87d0a44c15a` | `vendor/nvim-plugins/which-key.nvim/LICENSE` |
 | nvim-web-devicons | `2ae6958df7ced50baac5035cec0c15799eedfbf7` | `vendor/nvim-plugins/nvim-web-devicons/LICENSE` |
+| Base16 Atelier Estuary (Base16 Vim) | `3be3cd82cd31acfcab9a41bad853d9c68d30478d` | `vendor/nvim-themes/base16-atelierestuary/LICENSE.md` |
 
 The three Vim plugins state that they use the Vim license. Its complete text is retained at `licenses/VIM_LICENSE.txt`.
 
 LuaSnip's optional jsregexp build submodules are not part of the installed or bundled runtime; LuaSnip's pure-Lua and LSP-snippet paths are used without a build step.
 
-Source locations and pin metadata are recorded in `vendor/LOCK.tsv` and `.gitmodules`. No third-party repository history is folded into this repository's history.
+Submodule source locations and pins are recorded in `vendor/LOCK.tsv` and `.gitmodules`. The single vendored Base16 theme file, its SHA-256, upstream path, and source commit are recorded in `vendor/SOURCE_LOCK.tsv`; `nvim/colors/base16-atelierestuary.vim` supplies the historical source-config name without modifying the licensed upstream file. No third-party repository history is folded into this repository's history.

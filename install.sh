@@ -129,6 +129,17 @@ check_dependencies() {
   done < "$repo_root/vendor/LOCK.tsv"
 }
 
+check_vendored_sources() {
+  local path commit url source checksum license
+  while IFS=$'\t' read -r path commit url source checksum license; do
+    [[ -n "$path" && ${path:0:1} != '#' ]] || continue
+    [[ "$url" == https://github.com/* ]] || fail "non-public vendored source URL: $url"
+    [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || fail "invalid vendored source commit: $commit"
+    [[ -f "$repo_root/$path/$source" ]] || fail "missing vendored source: $path/$source"
+    [[ -f "$repo_root/$path/$license" ]] || fail "missing vendored source license: $path/$license"
+  done < "$repo_root/vendor/SOURCE_LOCK.tsv"
+}
+
 verify_bundle_if_present() {
   if [[ -f "$repo_root/BUNDLE-SHA256SUMS" ]]; then
     "$repo_root/scripts/verify-checksums.sh" "$repo_root/BUNDLE-SHA256SUMS" "$repo_root" >/dev/null
@@ -151,6 +162,7 @@ select_profile
 check_host
 verify_bundle_if_present
 check_dependencies
+check_vendored_sources
 
 if [[ "$mode" == check ]]; then
   printf '%s profile is ready; host requirements and exact snapshots passed.\n' "$profile_label"
@@ -206,6 +218,7 @@ while IFS=$'\t' read -r path commit kind url license; do
     rm -rf "$staging_root/nvim-pack/start/$name/deps"
   fi
 done < "$repo_root/vendor/LOCK.tsv"
+copy_snapshot "$repo_root/vendor/nvim-themes/base16-atelierestuary" "$staging_root/nvim-pack/start/base16-atelierestuary"
 
 cp "$repo_root/config/zshrc" "$staging_root/zshrc"
 cp "$repo_root/config/p10k.zsh" "$staging_root/p10k.zsh"

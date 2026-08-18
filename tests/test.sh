@@ -47,6 +47,16 @@ snapshot() {
   )
 }
 
+sha256_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    fail 'sha256sum or shasum is required'
+  fi
+}
+
 check_pins() {
   local path commit kind url license actual staged
   while IFS=$'\t' read -r path commit kind url license; do
@@ -58,6 +68,19 @@ check_pins() {
     [[ "$staged" == "$commit" ]] || fail "$path gitlink is $staged; expected $commit"
     [[ -f "$repo_root/$path/$license" ]] || fail "missing license: $path/$license"
   done < "$repo_root/vendor/LOCK.tsv"
+}
+
+check_vendored_sources() {
+  local path commit url source expected license actual
+  while IFS=$'\t' read -r path commit url source expected license; do
+    [[ -n "$path" && ${path:0:1} != '#' ]] || continue
+    [[ "$url" == https://github.com/* ]] || fail "non-public vendored source URL: $url"
+    [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || fail "invalid vendored source commit: $commit"
+    [[ -f "$repo_root/$path/$source" ]] || fail "missing vendored source: $path/$source"
+    actual=$(sha256_file "$repo_root/$path/$source")
+    [[ "$actual" == "$expected" ]] || fail "$path/$source is $actual; expected $expected"
+    [[ -f "$repo_root/$path/$license" ]] || fail "missing vendored source license: $path/$license"
+  done < "$repo_root/vendor/SOURCE_LOCK.tsv"
 }
 
 run_check_and_dry_run() {
@@ -132,7 +155,8 @@ run_install() {
     oil.nvim/lua/oil/init.lua \
     leap.nvim/lua/leap/init.lua \
     which-key.nvim/lua/which-key/init.lua \
-    nvim-web-devicons/lua/nvim-web-devicons.lua; do
+    nvim-web-devicons/lua/nvim-web-devicons.lua \
+    base16-atelierestuary/colors/base16-atelier-estuary.vim; do
     assert_file "$data_home/nvim/site/pack/portable/start/$plugin_file"
   done
   assert_contains "$home/.zshrc.local" 'local seam'
@@ -160,6 +184,7 @@ bash -n "$repo_root/install.sh" "$repo_root/scripts/build-bundle.sh" "$repo_root
 bash -n "$repo_root/tests/test.sh" "$repo_root/tests/prove-runtime.sh" "$repo_root/tests/prove-bundle.sh"
 zsh -n "$repo_root/config/zshrc" "$repo_root/config/p10k.zsh"
 check_pins
+check_vendored_sources
 [[ "$(git -C "$repo_root" ls-files --stage nvim/init.vim | awk '{print $1}')" == 100644 ]] || fail 'Neovim config is not vendored as ordinary files'
 
 printf '%s\n' '[2/6] macOS and Linux check/dry-run profiles'

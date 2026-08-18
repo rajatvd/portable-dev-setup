@@ -1,0 +1,2 @@
+# path	commit	url	source	sha256	license
+vendor/nvim-themes/base16-atelierestuary	3be3cd82cd31acfcab9a41bad853d9c68d30478d	https://github.com/chriskempson/base16-vim.git	colors/base16-atelier-estuary.vim	1bea433aa6c3c85a50f07665ac111c43e8848ff08476fe88a47329aff632825f	LICENSE.md

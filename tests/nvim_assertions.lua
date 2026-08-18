@@ -26,6 +26,8 @@ check(vim.o.colorcolumn == "88", "colorcolumn setting was not loaded")
 check(vim.o.guicursor == "", "guicursor setting was not loaded")
 check(vim.o.undofile, "undo setting was not loaded")
 check(not vim.o.swapfile and not vim.o.backup, "temporary-file settings were not loaded")
+check(vim.o.background == "dark", "dark background setting was not retained")
+check(vim.g.colors_name == "base16-atelierestuary", "required base16-atelierestuary colorscheme was not loaded")
 check(vim.g.mapleader == " ", "leader was not loaded")
 
 check_rhs("<Space>w", "n", ":write<CR>", "leader save mapping was not loaded")
@@ -121,6 +123,7 @@ local runtime_files = {
   "plugin/commentary.vim",
   "plugin/fugitive.vim",
   "plugin/surround.vim",
+  "colors/base16-atelier-estuary.vim",
 }
 for _, name in ipairs(runtime_files) do
   check(#vim.api.nvim_get_runtime_file(name, false) > 0, name .. " is absent from runtimepath")

@@ -7,7 +7,7 @@ A host-neutral zsh, Powerlevel10k, and source-backed Neovim package for macOS an
 - `~/.zshrc` and `~/.p10k.zsh`
 - `${XDG_CONFIG_HOME:-$HOME/.config}/nvim`
 - Oh My Zsh, Powerlevel10k, and zsh plugins under `${XDG_DATA_HOME:-$HOME/.local/share}/portable-dev-setup`
-- exact Neovim plugin snapshots under `${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/portable`
+- exact Neovim plugin and Base16 Atelier Estuary theme snapshots under `${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/portable`
 
 Existing managed targets are moved first to `${XDG_STATE_HOME:-$HOME/.local/state}/portable-dev-setup/backups/<timestamp>-<process-id>/`. The installer never changes the login shell and never touches `~/.zshrc.local`; that ignored file is the only machine-local extension point.
 
@@ -15,7 +15,7 @@ Existing managed targets are moved first to `${XDG_STATE_HOME:-$HOME/.local/stat
 
 The configuration preserves the portable editor behavior behind this distribution:
 
-- relative and absolute line numbers, four-space indentation, persistent XDG undo, wrapped text, centered scrolling, quickfix navigation, and an 88-column guide;
+- the dark Base16 Atelier Estuary colorscheme, relative and absolute line numbers, four-space indentation, persistent XDG undo, wrapped text, centered scrolling, quickfix navigation, and an 88-column guide;
 - source-backed save, escape, window, line-motion, tag, command-line, terminal, and quickfix mappings;
 - native Neovim LSP startup for Python, C, C++, and Lua;
 - `nvim-cmp` with LSP, buffer, path, and LuaSnip completion sources;
@@ -85,14 +85,14 @@ make bundle
 
 Python 3 is a maintainer-only bundle-build requirement. Installing and running a downloaded bundle remains Bash/POSIX-only and does not invoke Python.
 
-This creates `dist/portable-dev-setup-1.0.0.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all required shell and Neovim snapshots, their licenses, and the complete runtime payload. Archive ordering, timestamps, ownership, modes, and gzip metadata are canonicalized from the exact source commit so repeated builds produce identical files.
+This creates `dist/portable-dev-setup-1.0.1.tar.gz` and an outer SHA-256 file. The archive also contains `BUNDLE-SHA256SUMS`, covering every included file. It materializes all required shell and Neovim snapshots, their licenses, and the complete runtime payload. Archive ordering, timestamps, ownership, modes, and gzip metadata are canonicalized from the exact source commit so repeated builds produce identical files.
 
 After downloading both files, verify and install without network access:
 
 ```sh
-shasum -a 256 -c portable-dev-setup-1.0.0.tar.gz.sha256
-tar -xzf portable-dev-setup-1.0.0.tar.gz
-cd portable-dev-setup-1.0.0
+shasum -a 256 -c portable-dev-setup-1.0.1.tar.gz.sha256
+tar -xzf portable-dev-setup-1.0.1.tar.gz
+cd portable-dev-setup-1.0.1
 ./scripts/verify-checksums.sh BUNDLE-SHA256SUMS .
 make install
 ```
