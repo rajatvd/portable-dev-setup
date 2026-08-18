@@ -22,6 +22,8 @@ package_root=$proof_root/$package
 if find "$package_root" -name .git -print | grep -q .; then
   fail 'bundle contains Git metadata'
 fi
+[[ ! -e "$package_root/vendor/nvim-plugins/luasnip/deps" ]] || fail 'bundle contains optional LuaSnip build submodules'
+[[ ! -e "$package_root/vendor/nvim-plugins/luasnip/.gitmodules" ]] || fail 'bundle contains optional LuaSnip submodule metadata'
 "$package_root/scripts/verify-checksums.sh" "$package_root/BUNDLE-SHA256SUMS" "$package_root" > "$proof_root/inner-check.out"
 "$package_root/tests/prove-runtime.sh" "$package_root"
 printf 'Offline bundle extraction and runtime proof passed.\n'

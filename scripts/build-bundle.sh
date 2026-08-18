@@ -53,6 +53,10 @@ while IFS=$'\t' read -r path commit kind url license; do
     mkdir -p "$(dirname -- "$destination/$license")"
     git -C "$source_dir" show "$commit:$license" > "$destination/$license"
   fi
+  if [[ "$path" == vendor/nvim-plugins/luasnip ]]; then
+    rm -rf "$destination/deps"
+    rm -f "$destination/.gitmodules"
+  fi
   printf '%s\n' "$commit" > "$destination/.portable-revision"
 done < "$repo_root/vendor/LOCK.tsv"
 
