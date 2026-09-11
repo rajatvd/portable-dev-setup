@@ -81,7 +81,13 @@ function M.setup()
   for _, name in ipairs({ "InstantMarkdownPreview", "InstantMarkdownStop" }) do
     vim.api.nvim_create_user_command(name, function()
       if not config.need("markdown_preview") or not config.executable("instant-markdown-d") then return end
+      if vim.bo.filetype ~= "markdown" then
+        vim.notify("Markdown preview requires a Markdown buffer", vim.log.levels.WARN)
+        return
+      end
       vim.cmd("packadd vim-instant-markdown")
+      -- packadd does not replay FileType for the buffer that requested activation.
+      vim.cmd("runtime! ftplugin/markdown/instant-markdown.vim")
       vim.cmd(name)
     end, {})
   end

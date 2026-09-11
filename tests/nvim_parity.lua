@@ -281,4 +281,32 @@ vim.cmd, require("telescope").load_extension = cmd, load_extension
 package.loaded.octo, package.loaded.cmp_git = loaded_octo, loaded_git
 vim.notify, vim.system, config.executable = notify, system, executable
 config.options = {}
+
+-- Real lazy ftplugin activation with process stubs; no preview server or HTTP connection.
+local fixture_bin = vim.env.HOME .. "/preview-bin"
+local effect_log = vim.env.HOME .. "/preview-effects"
+vim.fn.mkdir(fixture_bin, "p")
+vim.fn.delete(effect_log)
+for _, tool in ipairs({ "instant-markdown-d", "curl" }) do
+  local path = fixture_bin .. "/" .. tool
+  vim.fn.writefile({
+    "#!/bin/sh",
+    "printf '%s\\n' '" .. tool .. "' >> \"$HOME/preview-effects\"",
+    "while IFS= read -r line; do :; done",
+  }, path)
+  vim.fn.setfperm(path, "rwx------")
+end
+local path = vim.env.PATH
+vim.env.PATH = fixture_bin .. ":" .. path
+config.options.markdown_preview = { enabled = true }
+fresh("markdown")
+check(vim.fn.filereadable(effect_log) == 0, "Markdown preview must not autostart")
+vim.cmd("InstantMarkdownPreview")
+check(vim.api.nvim_buf_get_commands(0, {}).InstantMarkdownPreview ~= nil, "lazy Markdown ftplugin must attach to requesting buffer")
+check(vim.wait(1000, function() return vim.fn.filereadable(effect_log) == 1 end), "preview did not reach stub daemon")
+vim.cmd("InstantMarkdownStop")
+check(vim.wait(1000, function() return #vim.fn.readfile(effect_log) >= 2 end), "preview stop did not reach stub HTTP tool")
+check(vim.fn.readfile(effect_log)[1] == "instant-markdown-d" and vim.fn.readfile(effect_log)[2] == "curl", "preview/stop effect order")
+vim.env.PATH = path
+config.options = {}
 vim.api.nvim_out_write("Neovim parity regressions passed (account/process callbacks instrumented; terminal and buffers real).\n")
