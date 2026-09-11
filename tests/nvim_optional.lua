@@ -19,7 +19,7 @@ let g:send_target = {'send': function('OptionalCapture')}
 ]])
 require("portable.repl").defaults()
 check(vim.g.optional_sent[1] == "size=3", "default argument extraction from real AST")
-local calls, system = {}, vim.system
+local calls, completions, kills, system = {}, {}, 0, vim.system
 local config = require("portable.config")
 config.options.media = {
   enabled = true,
@@ -29,12 +29,24 @@ config.options.media = {
 }
 vim.system = function(argv, _, callback)
   table.insert(calls, argv)
-  if callback then callback({ code = 0 }) end
-  return {}
+  if callback then table.insert(completions, callback) end
+  return { kill = function() kills = kills + 1 end }
 end
 require("portable.workflows").render()
-check(vim.wait(1000, function() return #calls == 2 end), "render/player dispatch")
-check(calls[1][3] == "Demo" and calls[2][2] == "Demo.mp4", "scene extraction from real AST; external tools stubbed")
+require("portable.workflows").render()
+check(kills == 1, "repeated render must interrupt its predecessor")
+completions[1]({ code = 0 })
+completions[2]({ code = 0 })
+check(vim.wait(1000, function() return #calls == 3 end), "only current render may start player")
+check(calls[1][3] == "Demo" and calls[3][2] == "Demo.mp4", "scene extraction from real AST; external tools stubbed")
+require("portable.workflows").render()
+check(kills == 2, "repeated render must interrupt its previous player")
+local notify, failure = vim.notify
+vim.notify = function(message) failure = message end
+completions[3]({ code = 1 })
+vim.wait(20)
+vim.notify = notify
+check(#calls == 4 and failure:find("Scene render failed", 1, true), "failed render must diagnose without starting player")
 vim.system = system
 vim.g.send_target = nil
 -- Real file-backed marked-block scan; explicit synthetic root/markers, no default private discovery.

@@ -6,4 +6,6 @@
 - Preserve existing dependency pins and inherited Oil/Telescope bindings; add licensed, exact public snapshots needed by the restored payload.
 - Replace feature-name bans with privacy/effect-boundary regression checks. Exercise the installed and extracted-bundle payload, including the Base16 theme missing from the older release.
 
+- Correct materialized-bundle detection beneath an enclosing Git repository; verify that case in the bundle proof.
+
 This is a review candidate, not a default-branch or release cutover. Host dependencies, historical-runtime uncertainty and distribution boundaries are documented in README.

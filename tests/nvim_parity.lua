@@ -11,6 +11,7 @@ check(not vim.o.expandtab and not vim.o.ignorecase, "source global indentation/s
 check(vim.o.wrap and vim.o.showtabline == 2, "final wrap and airline tabline")
 check(vim.g.airline_theme == "base16_atelier_estuary", "airline theme")
 check(vim.api.nvim_get_hl(0, { name = "Normal" }).bg == 0x22221b, "actual Base16 palette")
+check(vim.api.nvim_get_hl(0, { name = "ColorColumn" }).bg == 0x302f27, "ColorColumn after theme/plugin load order")
 for _, mode in ipairs({ "n", "v" }) do check(map("  y", mode).rhs == '"+y', "clipboard operator: " .. mode) end
 check(map("Y  ").rhs == '"+Y', "clipboard line yank")
 for _, key in ipairs({ "<Esc>", "jk", "kj" }) do

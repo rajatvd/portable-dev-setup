@@ -115,7 +115,7 @@ check_dependencies() {
   while IFS=$'\t' read -r path commit kind url license; do
     [[ -n "$path" && ${path:0:1} != '#' ]] || continue
     [[ -d "$repo_root/$path" ]] || fail "missing dependency snapshot: $path (use a recursive clone)"
-    if actual=$(git -C "$repo_root/$path" rev-parse HEAD 2>/dev/null); then
+    if [[ -e "$repo_root/$path/.git" ]] && actual=$(git -C "$repo_root/$path" rev-parse HEAD 2>/dev/null); then
       [[ "$actual" == "$commit" ]] || fail "$path is at $actual; expected $commit"
       state=$(git -C "$repo_root/$path" status --porcelain --untracked-files=all)
       [[ -z "$state" ]] || fail "dependency snapshot has local changes: $path"

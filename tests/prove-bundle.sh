@@ -6,6 +6,11 @@ version=$(cat "$repo_root/VERSION")
 package=portable-dev-setup-$version
 proof_root=$(mktemp -d "${TMPDIR:-/tmp}/portable-dev-setup-bundle-proof.XXXXXX")
 trap 'rm -rf "$proof_root"' EXIT
+# A materialized bundle must not mistake its enclosing repository for a dependency checkout.
+git -C "$proof_root" init -q
+git -C "$proof_root" -c user.name='Fixture' -c user.email='fixture@example.invalid' \
+  -c commit.gpgsign=false commit --allow-empty -qm 'Enclosing repository fixture'
+
 
 fail() {
   printf 'BUNDLE PROOF FAILED: %s\n' "$*" >&2

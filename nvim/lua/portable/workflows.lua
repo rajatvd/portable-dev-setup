@@ -153,10 +153,18 @@ function M.render()
   local command = cfg.render_command(file, scene)
   if not config.executable(command[1]) then return end
   -- argv providers permit custom session/monitor/output policies without embedded shell interpolation.
-  vim.system(command, { text = true }, vim.schedule_wrap(function(result)
+  -- Repeating the source action interrupts the previous render/player, never unrelated sessions.
+  M.render_generation = (M.render_generation or 0) + 1
+  local generation = M.render_generation
+  if M.render_job then M.render_job:kill(2) end
+  if M.player_job then M.player_job:kill(2) end
+  M.render_job, M.player_job = nil, nil
+  M.render_job = vim.system(command, { text = true }, vim.schedule_wrap(function(result)
+    if generation ~= M.render_generation then return end
+    M.render_job = nil
     if result.code ~= 0 then vim.notify("Scene render failed; player was not started", vim.log.levels.ERROR); return end
     local player = cfg.player_command(cfg.video_path(file, scene))
-    if config.executable(player[1]) then vim.system(player) end
+    if config.executable(player[1]) then M.player_job = vim.system(player) end
   end))
 end
 
