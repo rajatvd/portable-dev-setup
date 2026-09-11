@@ -1,18 +1,12 @@
+let g:pydocstring_doq_path = "doq"
+for s:config in ['airline', 'surround', 'vim-autoformat', 'vimtex', 'vim-instant-markdown']
+  execute 'source ' . fnameescape(stdpath('config') . '/plug-configs/' . s:config . '.vim')
+endfor
 nnoremap <silent> <leader>gs :Git<CR>
-
-let g:surround_no_mappings = 1
-nmap de  <Plug>Dsurround
-nmap ce  <Plug>Csurround
-nmap cE  <Plug>CSurround
-nmap ye  <Plug>Ysurround
-nmap yE  <Plug>YSurround
-nmap yee <Plug>Yssurround
-nnoremap yEe <Plug>YSsurround
-nnoremap yEE <Plug>YSsurround
-xnoremap E   <Plug>VSurround
-xnoremap gE  <Plug>VgSurround
-
-augroup portable_commentary
+nnoremap <silent> <leader>gp :Git push<CR>
+augroup portable_filetypes
   autocmd!
-  autocmd FileType cpp setlocal commentstring=//\ %s
+  autocmd BufRead,BufNewFile *.cu,*.cuh setfiletype cuda
+  autocmd BufRead,BufNewFile *.mojo,*.🔥 setfiletype mojo
+  autocmd FileType cuda,cpp setlocal commentstring=//\ %s
 augroup END

@@ -2,3 +2,5 @@
 .local/
 dist/
 .zshrc.local
+nvim-local.lua
+.venv/

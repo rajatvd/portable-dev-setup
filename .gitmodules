@@ -55,3 +55,120 @@
 [submodule "vendor/nvim-plugins/nvim-web-devicons"]
 	path = vendor/nvim-plugins/nvim-web-devicons
 	url = https://github.com/nvim-tree/nvim-web-devicons.git
+[submodule "vendor/nvim-plugins/vim-airline"]
+	path = vendor/nvim-plugins/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule "vendor/nvim-plugins/vim-airline-themes"]
+	path = vendor/nvim-plugins/vim-airline-themes
+	url = https://github.com/vim-airline/vim-airline-themes.git
+[submodule "vendor/nvim-plugins/fzf"]
+	path = vendor/nvim-plugins/fzf
+	url = https://github.com/junegunn/fzf.git
+[submodule "vendor/nvim-plugins/fzf.vim"]
+	path = vendor/nvim-plugins/fzf.vim
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule "vendor/nvim-plugins/vim-rooter"]
+	path = vendor/nvim-plugins/vim-rooter
+	url = https://github.com/airblade/vim-rooter.git
+[submodule "vendor/nvim-plugins/vim-pydocstring"]
+	path = vendor/nvim-plugins/vim-pydocstring
+	url = https://github.com/heavenshell/vim-pydocstring.git
+[submodule "vendor/nvim-plugins/vim-pythonsense"]
+	path = vendor/nvim-plugins/vim-pythonsense
+	url = https://github.com/jeetsukumaran/vim-pythonsense.git
+[submodule "vendor/nvim-plugins/vim-indent-object"]
+	path = vendor/nvim-plugins/vim-indent-object
+	url = https://github.com/michaeljsmith/vim-indent-object.git
+[submodule "vendor/nvim-plugins/vim-dispatch"]
+	path = vendor/nvim-plugins/vim-dispatch
+	url = https://github.com/tpope/vim-dispatch.git
+[submodule "vendor/nvim-plugins/vimtex"]
+	path = vendor/nvim-plugins/vimtex
+	url = https://github.com/lervag/vimtex.git
+[submodule "vendor/nvim-plugins/vim-autoformat"]
+	path = vendor/nvim-plugins/vim-autoformat
+	url = https://github.com/vim-autoformat/vim-autoformat.git
+[submodule "vendor/nvim-plugins/friendly-snippets"]
+	path = vendor/nvim-plugins/friendly-snippets
+	url = https://github.com/rafamadriz/friendly-snippets.git
+[submodule "vendor/nvim-plugins/luasnip-latex-snippets.nvim"]
+	path = vendor/nvim-plugins/luasnip-latex-snippets.nvim
+	url = https://github.com/iurimateus/luasnip-latex-snippets.nvim.git
+[submodule "vendor/nvim-plugins/telescope-media-files.nvim"]
+	path = vendor/nvim-plugins/telescope-media-files.nvim
+	url = https://github.com/nvim-telescope/telescope-media-files.nvim.git
+[submodule "vendor/nvim-plugins/telescope-luasnip.nvim"]
+	path = vendor/nvim-plugins/telescope-luasnip.nvim
+	url = https://github.com/benfowler/telescope-luasnip.nvim.git
+[submodule "vendor/nvim-plugins/nvim-treesitter"]
+	path = vendor/nvim-plugins/nvim-treesitter
+	url = https://github.com/nvim-treesitter/nvim-treesitter.git
+[submodule "vendor/nvim-plugins/playground"]
+	path = vendor/nvim-plugins/playground
+	url = https://github.com/nvim-treesitter/playground.git
+[submodule "vendor/nvim-plugins/nvim-treesitter-textobjects"]
+	path = vendor/nvim-plugins/nvim-treesitter-textobjects
+	url = https://github.com/nvim-treesitter/nvim-treesitter-textobjects.git
+[submodule "vendor/nvim-plugins/vim-repeat"]
+	path = vendor/nvim-plugins/vim-repeat
+	url = https://github.com/tpope/vim-repeat.git
+[submodule "vendor/nvim-plugins/leap-ast.nvim"]
+	path = vendor/nvim-plugins/leap-ast.nvim
+	url = https://github.com/ggandor/leap-ast.nvim.git
+[submodule "vendor/nvim-plugins/nvim-colorizer.lua"]
+	path = vendor/nvim-plugins/nvim-colorizer.lua
+	url = https://github.com/norcalli/nvim-colorizer.lua.git
+[submodule "vendor/nvim-plugins/copilot.vim"]
+	path = vendor/nvim-plugins/copilot.vim
+	url = https://github.com/github/copilot.vim.git
+[submodule "vendor/nvim-plugins/octo.nvim"]
+	path = vendor/nvim-plugins/octo.nvim
+	url = https://github.com/pwntester/octo.nvim.git
+[submodule "vendor/nvim-plugins/cmp-git"]
+	path = vendor/nvim-plugins/cmp-git
+	url = https://github.com/petertriho/cmp-git.git
+[submodule "vendor/nvim-plugins/orgmode"]
+	path = vendor/nvim-plugins/orgmode
+	url = https://github.com/nvim-orgmode/orgmode.git
+[submodule "vendor/nvim-plugins/org-bullets.nvim"]
+	path = vendor/nvim-plugins/org-bullets.nvim
+	url = https://github.com/akinsho/org-bullets.nvim.git
+[submodule "vendor/nvim-plugins/telescope-orgmode.nvim"]
+	path = vendor/nvim-plugins/telescope-orgmode.nvim
+	url = https://github.com/nvim-orgmode/telescope-orgmode.nvim.git
+[submodule "vendor/nvim-plugins/vim-test"]
+	path = vendor/nvim-plugins/vim-test
+	url = https://github.com/vim-test/vim-test.git
+[submodule "vendor/nvim-plugins/auto-pairs"]
+	path = vendor/nvim-plugins/auto-pairs
+	url = https://github.com/jiangmiao/auto-pairs.git
+[submodule "vendor/nvim-plugins/tagbar"]
+	path = vendor/nvim-plugins/tagbar
+	url = https://github.com/preservim/tagbar.git
+[submodule "vendor/nvim-plugins/cmp-cmdline"]
+	path = vendor/nvim-plugins/cmp-cmdline
+	url = https://github.com/hrsh7th/cmp-cmdline.git
+[submodule "vendor/nvim-plugins/neodev.nvim"]
+	path = vendor/nvim-plugins/neodev.nvim
+	url = https://github.com/folke/neodev.nvim.git
+[submodule "vendor/nvim-plugins/vim-instant-markdown"]
+	path = vendor/nvim-plugins/vim-instant-markdown
+	url = https://github.com/instant-markdown/vim-instant-markdown.git
+[submodule "vendor/nvim-plugins/jupytext.vim"]
+	path = vendor/nvim-plugins/jupytext.vim
+	url = https://github.com/goerz/jupytext.vim.git
+[submodule "vendor/nvim-plugins/jupyter_ascending.vim"]
+	path = vendor/nvim-plugins/jupyter_ascending.vim
+	url = https://github.com/untitled-ai/jupyter_ascending.vim.git
+[submodule "vendor/nvim-plugins/vim-polyglot"]
+	path = vendor/nvim-plugins/vim-polyglot
+	url = https://github.com/sheerun/vim-polyglot.git
+[submodule "vendor/nvim-plugins/gruvbox-material"]
+	path = vendor/nvim-plugins/gruvbox-material
+	url = https://github.com/sainnhe/gruvbox-material.git
+[submodule "vendor/nvim-plugins/gruvbox"]
+	path = vendor/nvim-plugins/gruvbox
+	url = https://github.com/gruvbox-community/gruvbox.git
+[submodule "vendor/nvim-plugins/rainglow"]
+	path = vendor/nvim-plugins/rainglow
+	url = https://github.com/rainglow/vim.git

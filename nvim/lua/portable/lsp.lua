@@ -4,8 +4,10 @@ M.server_specs = {
   python = {
     root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
     candidates = {
-      { name = "pyright", cmd = { "pyright-langserver", "--stdio" } },
-      { name = "pylsp", cmd = { "pylsp" } },
+      { name = "pyright", cmd = { "pyright-langserver", "--stdio" }, settings = {
+        pyright = { disableOrganizeImports = true }, python = { analysis = { ignore = { "*" } } },
+      } },
+      { name = "ruff", cmd = { "ruff", "server" } },
     },
   },
   c = {
@@ -37,6 +39,19 @@ M.server_specs = {
   },
 }
 
+M.server_specs.cuda = M.server_specs.cpp
+for ft, spec in pairs({
+  tex = { "texlab", { "texlab" }, { ".latexmkrc", "latexmkrc", ".git" } },
+  plaintex = { "texlab", { "texlab" }, { ".latexmkrc", "latexmkrc", ".git" } },
+  bib = { "texlab", { "texlab" }, { ".latexmkrc", "latexmkrc", ".git" } },
+  vim = { "vimls", { "vim-language-server", "--stdio" }, { ".git" } },
+  markdown = { "marksman", { "marksman", "server" }, { ".marksman.toml", ".git" } },
+  html = { "html", { "vscode-html-language-server", "--stdio" }, { "package.json", ".git" } },
+  mojo = { "mojo", { "mojo-lsp-server" }, { "Mojo.toml", "package.mojo", ".git" } },
+}) do
+  M.server_specs[ft] = { root_markers = spec[3], candidates = { { name = spec[1], cmd = spec[2] } } }
+end
+
 local function buffer_map(bufnr, keys, action, description)
   vim.keymap.set("n", keys, action, {
     buffer = bufnr,
@@ -45,7 +60,7 @@ local function buffer_map(bufnr, keys, action, description)
   })
 end
 
-local function on_attach(client, bufnr)
+function M.on_attach(client, bufnr)
   buffer_map(bufnr, "<leader>R", vim.lsp.buf.rename, "Rename")
   buffer_map(bufnr, "<leader><leader>ca", vim.lsp.buf.code_action, "Code action")
   buffer_map(bufnr, "gd", vim.lsp.buf.definition, "Goto definition")
@@ -65,9 +80,13 @@ local function on_attach(client, bufnr)
     vim.lsp.buf.format({ bufnr = bufnr })
   end, { desc = "Format current buffer with LSP" })
 
-  if client.supports_method("textDocument/formatting") then
+  if client.name ~= "pyright" then
     buffer_map(bufnr, "<leader>a", function()
-      vim.lsp.buf.format({ bufnr = bufnr })
+      if client.name ~= "texlab" and client.supports_method("textDocument/formatting") then
+        vim.lsp.buf.format({ bufnr = bufnr })
+      else
+        vim.api.nvim_buf_call(bufnr, function() vim.cmd("Autoformat") end)
+      end
     end, "Format buffer")
   end
 end
@@ -90,41 +109,29 @@ local function start_for_buffer(args, capabilities)
     return
   end
 
-  local missing = {}
-  local selected
+  local missing, started = {}, {}
   for _, candidate in ipairs(spec.candidates) do
     if vim.fn.executable(candidate.cmd[1]) == 1 then
-      selected = candidate
-      break
+      local id = vim.lsp.start({
+        name = candidate.name,
+        cmd = candidate.cmd,
+        root_dir = project_root(args.buf, spec.root_markers),
+        capabilities = capabilities,
+        settings = vim.deepcopy(candidate.settings or {}),
+        before_init = candidate.name == "lua_ls" and require("neodev.lsp").before_init or nil,
+        on_attach = M.on_attach,
+      }, { bufnr = args.buf, silent = true })
+      table.insert(started, (id and "started:" or "failed:") .. candidate.name)
+    else
+      table.insert(missing, candidate.cmd[1])
     end
-    table.insert(missing, candidate.cmd[1])
   end
-
-  if not selected then
-    vim.b[args.buf].portable_lsp_status = "missing:" .. table.concat(missing, ",")
-    return
-  end
-
-  local client_id = vim.lsp.start({
-    name = selected.name,
-    cmd = selected.cmd,
-    root_dir = project_root(args.buf, spec.root_markers),
-    capabilities = capabilities,
-    settings = selected.settings,
-    on_attach = on_attach,
-  }, {
-    bufnr = args.buf,
-    silent = true,
-  })
-
-  if client_id then
-    vim.b[args.buf].portable_lsp_status = "started:" .. selected.name
-  else
-    vim.b[args.buf].portable_lsp_status = "failed:" .. selected.name
-  end
+  if #missing > 0 then table.insert(started, "missing:" .. table.concat(missing, ",")) end
+  vim.b[args.buf].portable_lsp_status = table.concat(started, ";")
 end
 
 function M.setup()
+  require("neodev").setup({ lspconfig = false })
   local signs = {
     { name = "DiagnosticSignError", text = "" },
     { name = "DiagnosticSignWarn", text = "" },
@@ -161,7 +168,7 @@ function M.setup()
   local group = vim.api.nvim_create_augroup("portable_native_lsp", { clear = true })
   vim.api.nvim_create_autocmd("FileType", {
     group = group,
-    pattern = { "python", "c", "cpp", "lua" },
+    pattern = vim.tbl_keys(M.server_specs),
     callback = function(args)
       start_for_buffer(args, capabilities)
     end,

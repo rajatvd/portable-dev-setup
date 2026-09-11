@@ -7,13 +7,13 @@ set relativenumber
 set hidden
 set noerrorbells
 set smartcase
-set ignorecase
+set noignorecase
 set incsearch
 set nohlsearch
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set expandtab
+set noexpandtab
 set smartindent
 set wrap
 set scrolloff=8

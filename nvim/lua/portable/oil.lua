@@ -65,12 +65,13 @@ function M.setup()
       padding = 2,
       border = "rounded",
     },
-    preview = {
+    confirmation = {
       border = "rounded",
     },
     progress = {
       border = "rounded",
     },
+    ssh = { border = "rounded" },
     keymaps_help = {
       border = "rounded",
     },

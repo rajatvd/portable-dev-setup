@@ -50,7 +50,7 @@ home=$proof_root/home
 config_home=$home/xdg-config
 data_home=$home/xdg-data
 state_home=$home/xdg-state
-mkdir -p "$config_home/nvim" "$data_home/portable-dev-setup" "$data_home/nvim/site/pack/portable"
+mkdir -p "$home/.git" "$config_home/nvim" "$data_home/portable-dev-setup" "$data_home/nvim/site/pack/portable"
 printf 'old zshrc\n' > "$home/.zshrc"
 printf 'old prompt\n' > "$home/.p10k.zsh"
 printf 'old config\n' > "$config_home/nvim/old.txt"
@@ -80,19 +80,52 @@ run_bounded 30 "$proof_root/zsh.out" "$proof_root/zsh.err" \
   zsh -dfc 'source "$HOME/.zshrc"; [[ "$PORTABLE_LOCAL_SEAM" == loaded ]]; [[ "$POWERLEVEL9K_DISABLE_GITSTATUS" == true ]]; [[ -n "${functions[prompt_powerlevel10k_setup]-}" ]]; alias zshconfig >/dev/null; alias nvconfig >/dev/null; print "zsh runtime assertions passed"'
 grep -Fq 'zsh runtime assertions passed' "$proof_root/zsh.out" || fail 'zsh assertions did not finish'
 
+cd "$home"
 lua_assertions=$repo_root/tests/nvim_assertions.lua
 nvim_bin=$(command -v nvim)
 mkdir -p "$proof_root/nvim-bin"
+for tool in sh uname; do ln -s "$(command -v "$tool")" "$proof_root/nvim-bin/$tool"; done
 ln -s "$nvim_bin" "$proof_root/nvim-bin/nvim"
 run_bounded 30 "$proof_root/nvim.out" "$proof_root/nvim.err" \
-  env HOME="$home" XDG_CONFIG_HOME="$config_home" XDG_DATA_HOME="$data_home" XDG_STATE_HOME="$state_home" \
+  env -i HOME="$home" XDG_CONFIG_HOME="$config_home" XDG_DATA_HOME="$data_home" XDG_STATE_HOME="$state_home" SHELL=/bin/sh \
+  XDG_CACHE_HOME="$home/xdg-cache" NVIM_PORTABLE_LOCAL= \
   PATH="$proof_root/nvim-bin" \
-  nvim --headless --cmd 'set shortmess+=I' "+lua dofile([[$lua_assertions]])" +qa
+  nvim --headless --cmd 'set shortmess+=I' "+lua local ok, err = xpcall(function() dofile([[$lua_assertions]]); dofile([[$repo_root/tests/nvim_parity.lua]]) end, debug.traceback); if not ok then print(err); vim.cmd('cquit') end" +qa!
 if ! grep -Fq 'Expanded Neovim runtime assertions passed.' "$proof_root/nvim.out" && \
    ! grep -Fq 'Expanded Neovim runtime assertions passed.' "$proof_root/nvim.err"; then
   cat "$proof_root/nvim.out" >&2 || true
   cat "$proof_root/nvim.err" >&2 || true
   fail 'Neovim assertions did not finish'
+fi
+
+if [[ -n "${PORTABLE_TEST_PARSERS:-}" ]]; then
+  command -v rg >/dev/null || fail 'optional parser proof needs rg'
+  ln -s "$(command -v rg)" "$proof_root/nvim-bin/rg"
+  cat > "$home/fixture.org" <<'ORG'
+* Example event
+:PROPERTIES:
+:STARTTIME: 0
+:ENDTIME: 9999999999
+:END:
+** Notes
+Synthetic content
+ORG
+  cat > "$home/local-fixture.lua" <<'LUA'
+local file = vim.env.HOME .. "/fixture.org"
+return {
+  parser_path = vim.env.PORTABLE_TEST_PARSERS,
+  org = { enabled = true, agenda_files = { file }, notes_file = file, scratch_file = file },
+  calendar = { enabled = true, file = file, parse_timestamp = tonumber },
+}
+LUA
+  run_bounded 30 "$proof_root/optional.out" "$proof_root/optional.err" \
+    env -i HOME="$home" XDG_CONFIG_HOME="$config_home" XDG_DATA_HOME="$data_home" XDG_STATE_HOME="$state_home" SHELL=/bin/sh \
+    XDG_CACHE_HOME="$home/xdg-cache" NVIM_PORTABLE_LOCAL="$home/local-fixture.lua" \
+    PORTABLE_TEST_PARSERS="$PORTABLE_TEST_PARSERS" PATH="$proof_root/nvim-bin" \
+    nvim --headless "+lua local ok, err = xpcall(function() dofile([[$repo_root/tests/nvim_optional.lua]]) end, debug.traceback); if not ok then print(err); vim.cmd('cquit') end" +qa!
+  printf '%s\n' 'Provisioned-parser fixture proof passed.'
+else
+  printf '%s\n' 'Provisioned-parser fixture proof not run: set PORTABLE_TEST_PARSERS explicitly.'
 fi
 
 printf 'Installed runtime proof passed on %s with %s.\n' "$(uname -s)" "$(nvim --version | sed -n '1p')"

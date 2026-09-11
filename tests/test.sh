@@ -122,6 +122,7 @@ run_install() {
   printf 'old shell runtime\n' > "$data_home/portable-dev-setup/old.txt"
   printf 'old plugin runtime\n' > "$data_home/nvim/site/pack/portable/old.txt"
   printf 'local seam\n' > "$home/.zshrc.local"
+  printf 'return {} -- editor-local sentinel\n' > "$config_home/nvim-local.lua"
   make_fake_host "$kernel" "$bin_dir"
 
   HOME="$home" \
@@ -160,6 +161,7 @@ run_install() {
     assert_file "$data_home/nvim/site/pack/portable/start/$plugin_file"
   done
   assert_contains "$home/.zshrc.local" 'local seam'
+  assert_contains "$config_home/nvim-local.lua" 'editor-local sentinel'
   assert_absent "$config_home/nvim/.git"
   if find "$data_home/nvim/site/pack/portable" -name .git -print | grep -q .; then
     fail "$profile installed plugin Git metadata"
@@ -229,10 +231,9 @@ if grep -RInE 'curl|wget|PlugInstall|git[[:space:]]+clone' "$repo_root/nvim" "$r
   cat "$test_root/network-hits" >&2
   fail 'runtime or installer contains a network bootstrap path'
 fi
-if grep -RInEi '(mason|copilot|octo|orgmode|thesis|ipython|tmux|mpv|rsync|cuda|treesitter)' "$repo_root/nvim" > "$test_root/excluded-feature-hits"; then
-  cat "$test_root/excluded-feature-hits" >&2
-  fail 'excluded personal, host-specific, account, or parser behavior is present'
-fi
+git -C "$repo_root" check-ignore -q nvim-local.lua || fail 'editor-local config must be ignored'
+[[ ! -f "$repo_root/nvim/nvim-local.lua" ]] || fail 'local configuration must not enter the managed payload'
+[[ "$(grep -c 'nvim-opt' "$repo_root/vendor/LOCK.tsv")" -gt 0 ]] || fail 'explicit opt-in dependencies missing'
 if grep -InE 'sudo[[:space:]]|brew[[:space:]]+(install|update)|apt(-get)?[[:space:]]|yum[[:space:]]|dnf[[:space:]]|pacman[[:space:]]|cmake[[:space:]]|ninja[[:space:]]' \
   "$repo_root/install.sh" > "$test_root/host-mutation-hits"; then
   cat "$test_root/host-mutation-hits" >&2

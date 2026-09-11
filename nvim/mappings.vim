@@ -41,9 +41,9 @@ nnoremap <silent> <leader>k :cprev<CR>zz
 nnoremap <leader>q <C-w>q
 nnoremap <leader>o <C-w>o
 
-tnoremap <Esc> <C-\><C-n>
-tnoremap jk <C-\><C-n>
-tnoremap kj <C-\><C-n>
+tnoremap <expr> <Esc> &filetype ==# "fzf" ? "\<Esc>" : "\<C-\>\<C-n>"
+tnoremap <expr> jk &filetype ==# "fzf" ? "\<Esc>" : "\<C-\>\<C-n>"
+tnoremap <expr> kj &filetype ==# "fzf" ? "\<Esc>" : "\<C-\>\<C-n>"
 
 map <M-l> <C-T>
 map <M-h> <C-]>
@@ -55,3 +55,8 @@ nnoremap <leader>6 <C-6>
 nnoremap <leader>c :<Up>
 nnoremap ; :
 vnoremap ; :
+
+" Clipboard provider is supplied by the host; no clipboard state is distributed.
+nnoremap <leader><leader>y "+y
+vnoremap <leader><leader>y "+y
+nnoremap Y<leader><leader> "+Y

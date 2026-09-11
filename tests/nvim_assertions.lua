@@ -95,7 +95,7 @@ end
 check(type(cmp.get_config().snippet.expand) == "function", "snippet expansion is not configured")
 
 local expected_missing = {
-  python = "missing:pyright-langserver,pylsp",
+  python = "missing:pyright-langserver,ruff",
   c = "missing:clangd",
   cpp = "missing:clangd",
   lua = "missing:lua-language-server",
@@ -114,7 +114,7 @@ local lsp_patterns = {}
 for _, autocmd in ipairs(lsp_autocmds) do
   lsp_patterns[autocmd.pattern] = true
 end
-check(#lsp_autocmds == 4, "native LSP FileType boundary was not registered exactly once per language")
+check(#lsp_autocmds == vim.tbl_count(require("portable.lsp").server_specs), "native LSP FileType boundary was not registered exactly once per language")
 for _, filetype in ipairs({ "python", "c", "cpp", "lua" }) do
   check(lsp_patterns[filetype], "native LSP boundary is missing filetype: " .. filetype)
 end

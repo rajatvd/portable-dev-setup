@@ -211,9 +211,13 @@ copy_snapshot "$repo_root/nvim" "$staging_root/nvim"
 
 while IFS=$'\t' read -r path commit kind url license; do
   [[ -n "$path" && ${path:0:1} != '#' ]] || continue
-  [[ "$kind" == nvim ]] || continue
+  case "$kind" in
+    nvim) package_mode=start ;;
+    nvim-opt) package_mode=opt ;;
+    *) continue ;;
+  esac
   name=${path##*/}
-  copy_snapshot "$repo_root/$path" "$staging_root/nvim-pack/start/$name"
+  copy_snapshot "$repo_root/$path" "$staging_root/nvim-pack/$package_mode/$name"
   if [[ "$name" == luasnip ]]; then
     rm -rf "$staging_root/nvim-pack/start/$name/deps"
   fi

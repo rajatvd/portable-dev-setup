@@ -9,33 +9,40 @@ A host-neutral zsh, Powerlevel10k, and source-backed Neovim package for macOS an
 - Oh My Zsh, Powerlevel10k, and zsh plugins under `${XDG_DATA_HOME:-$HOME/.local/share}/portable-dev-setup`
 - exact Neovim plugin and Base16 Atelier Estuary theme snapshots under `${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/portable`
 
-Existing managed targets are moved first to `${XDG_STATE_HOME:-$HOME/.local/state}/portable-dev-setup/backups/<timestamp>-<process-id>/`. The installer never changes the login shell and never touches `~/.zshrc.local`; that ignored file is the only machine-local extension point.
+Existing managed targets are moved first to `${XDG_STATE_HOME:-$HOME/.local/state}/portable-dev-setup/backups/<timestamp>-<process-id>/`. The installer never changes the login shell and never touches `~/.zshrc.local`; that ignored file remains the shell-local extension point. Neovim has a separate optional `nvim-local.lua` table outside its managed directory (see below).
 
 ## Neovim features
 
-The configuration preserves the portable editor behavior behind this distribution:
+The payload preserves a source-backed **Vimscript/Lua hybrid**, including its load-order and filetype overrides:
 
-- the dark Base16 Atelier Estuary colorscheme, relative and absolute line numbers, four-space indentation, persistent XDG undo, wrapped text, centered scrolling, quickfix navigation, and an 88-column guide;
-- source-backed save, escape, window, line-motion, tag, command-line, terminal, and quickfix mappings;
-- native Neovim LSP startup for Python, C, C++, and Lua;
-- `nvim-cmp` with LSP, buffer, path, and LuaSnip completion sources;
-- Telescope with plenary and a file-finder mapping;
-- Oil as the directory editor;
-- Leap motions;
-- Which-Key and nvim-web-devicons;
-- vim-fugitive, vim-commentary, and the source-backed vim-surround mappings.
+- Base16 Atelier Estuary (with optional Gruvbox Material, Gruvbox and Rainglow palettes), Airline/tabline, four-column tabs, case-sensitive search with `smartcase`, persistent XDG undo, wrapped text, and an 88-column guide. Python's ftplugin uses spaces; Oil disables wrap locally; TeX/Markdown reassert it.
+- Save/escape/window/quickfix/tag motions, explicit clipboard yank (`<leader><leader>y`, `Y<leader><leader>`), and fzf-aware terminal escapes. Leader and local leader are Space.
+- Telescope (files, snippets, media, and configured Org pickers), Oil, Leap plus parser-backed AST motion, Which-Key, colorizer, Fugitive status and explicit push (`<leader>gp`), commentary, surround, root detection, textobjects, auto-pairs, Tagbar and vim-test.
+- `nvim-cmp`, LuaSnip, friendly/LaTeX snippet collections and VSCode lazy loading. Tab falls back when no completion/snippet action applies. Mode-specific mapping declarations are retained; **no `cmp.setup.cmdline` session is configured**.
+- Treesitter highlighting, textobjects, definition peeks and playground with **no parser downloads at startup**. Provision platform-compatible parsers on runtimepath; `parser_path` can point to a separate runtime directory. The plugin lockfile records its grammar revisions; Org uses grammar 1.3.4 or newer. `:PortableHealth` distinguishes missing parsers from disabled integrations.
+- VimTeX/latexmk and Autoformat policies; host-provided viewers/formatters. C/C++/CUDA build/clean/run/error-list keys (`<leader>m[dcre]`) and Python docstring/textobject/render keys are buffer-local and cleaned up on filetype changes.
+- Terminal toggle (`<leader>r`, `<leader><leader>R`), messages (`<leader>mb`), breakpoints (`<leader>id`), terminal selection (`:SendHere`, `:SendTo`), shape/length operators, default-argument sending and configured REPL startup.
+- Optional Copilot/Octo/Git completion, Org/capture/calendar, task quickfix/floating views, marked-text-block scanning (`:ThesisAI`), render/watch, notebook conversion, Markdown preview and remote sync. These are retained integrations, **not bundled accounts, documents or backends**.
 
-No Mason, Treesitter, Copilot, Octo, account integration, project state, calendar/org tooling, remote-sync workflow, media/render workflow, or host scheduler/toolchain configuration is included.
+### Host dependencies and explicit local configuration
 
-### Language-server boundary
+Run `:PortableHealth` for configuration/dependency status. No credentials, language servers, parsers, interpreters, viewer binaries, clipboard providers or toolchains are installed by Neovim or the installer.
 
-Language servers are optional host prerequisites, never managed dependencies:
+Language-server presets use host executables: Python starts **Pyright and Ruff together** when available (Ruff supplies linting/import organization); C/C++/CUDA use clangd; Lua uses lua-language-server with neodev; TeX/Bib use texlab; Vim uses vim-language-server; Markdown uses marksman; HTML uses vscode-html-language-server; Mojo uses mojo-lsp-server. Missing executables are recorded in `b:portable_lsp_status`. The format key excludes Pyright, uses native formatting where supported except Texlab, and otherwise invokes Autoformat. There is no format-on-save hook or Mason bootstrap.
 
-- Python: `pyright-langserver`, falling back to `pylsp`
-- C and C++: `clangd`
-- Lua: `lua-language-server`
+`Files`, `Buffers`, `History`, `Rg`, `RG`, and `GGrep` retain fzf previews/history/widget bindings. They require host **fzf >= 0.56.0**; file/grep search additionally requires ripgrep, and tags need ctags. No fzf binary installer is invoked by these guarded entrypoints. `MediaFiles` needs fd/chafa. Python docstrings need `doq`; builds need make; LaTeX compilation needs latexmk and a toolchain; formatting needs black/prettier/latexindent as appropriate.
 
-The configuration checks `PATH` when a matching filetype opens. If no server executable is present, startup remains clean and no client is started. The installer and Neovim configuration never install or download a language server.
+Copy `nvim/local.example.lua` to `${XDG_CONFIG_HOME:-$HOME/.config}/nvim-local.lua`, or set **`NVIM_PORTABLE_LOCAL`** to one trusted Lua file returning a table. The default file is outside the managed Neovim directory and is preserved by reinstall. Never add its contents to Git. With no local configuration, core editing works offline; attempting a configured-only workflow gives a diagnostic, not a silent no-op. Invalid local files produce a redacted diagnostic without echoing their source or values.
+
+Enable only the integrations you intend to use. Account packages live under `pack/portable/opt` and are not sourced until explicitly enabled. Enabling Copilot authorizes its provider and gives insert Ctrl-J to Copilot instead of cmp; its source-style `markdown=true` setting does **not** disable other filetypes. Octo's issue/PR/review context actions are retained. Authentication remains host/provider-owned; no authentication occurs in installation/tests.
+
+Org requires explicit agenda/notes paths and a provisioned parser; capture templates, scratch/calendar paths, timezone parsing/formatting and synchronization backends remain local. Task providers return quickfix items or Markdown. Marked-block scanning requires explicit markers and a root. REPL startup takes executable argv and optional startup lines, not a guessed activation alias/session. Rendering takes argv/output providers and starts the player only after successful rendering. Remote sync takes explicit local/remote paths and runs only on `ARsyncDown`, `ARsyncUp`, or `ARsyncUpDelete` (the latter deletes extraneous destination files). No project sync files are discovered or sourced automatically.
+
+### Compatibility and deliberate boundaries
+
+Existing dependency pins are unchanged. Added snapshots use a fixed Neovim 0.10 compatibility baseline; the Treesitter textobject dependency uses its matching legacy API branch, and the Org picker uses the maintained fork compatible with the Org API. Source defects repaired separately from privacy adaptations include terminal key escaping, the snippet update-event typo, first-terminal creation, unsafe shell interpolation, nil-environment REPL startup and cached/global filetype mappings. Airline changes the authored `showtabline=4` to an effective `2`; the earlier value is not forced back after plugin startup.
+
+Unknown historical plugin defaults, personal snippet bodies and local-hook contents are not reconstructed. Dormant custom modules remain dormant. The upstream terminal-sender, Mojo syntax and aggregate vim-colorschemes snapshots lacked clear redistribution grants: native terminal transport preserves the exercised send protocol, and Mojo detection/LSP remain available, but that third-party Mojo syntax package, unlicensed aggregate palette collection and external IPython-kernel transport are not distributed. The selected Base16 theme is supplied from its licensed upstream instead. Parser binaries are platform-specific host prerequisites, not portable bundled binaries. macOS UI, clipboard hardware, live accounts, render/display devices and external toolchains require checks on the intended host.
 
 ## Requirements
 
@@ -107,7 +114,15 @@ make prove         # isolated install plus bounded real zsh/Neovim assertions
 make prove-bundle  # two-build byte proof, checksums, extraction, reinstall, and startup
 ```
 
-The pinned Linux and macOS jobs assert source-backed settings and mappings, every included plugin module or command, completion sources, native LSP initialization with all server executables absent, clean exit, two-build bundle reproducibility, canonical archive metadata, and the full extracted-bundle reinstall path.
+The Linux/macOS proof jobs cover effective core/filetype settings, restored mappings, plugin surfaces, real terminal/buffer/snippet callbacks, missing-server safety, configured-only diagnostics, and instrumented formatting/account/process boundaries. Oil/Telescope defaults are exercised without adding redundant bindings. The extracted **actual bundle** runs the same regressions, including theme checks, after two byte-identical builds and checksum/metadata verification.
+
+For the additional real Python/Org parser, calendar-file and marked-block fixtures, provide a runtime directory containing compatible `parser/python.so` and `parser/org.so`, plus host ripgrep:
+
+```sh
+PORTABLE_TEST_PARSERS=/path/to/parser-runtime make prove
+```
+
+Without those prerequisites the extra parser proof is explicitly reported as not run; account/render/player calls remain instrumented, not live-account evidence.
 
 ## Licensing
 

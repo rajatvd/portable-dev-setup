@@ -48,12 +48,16 @@ function M.setup()
         },
       },
     },
+    extensions = { media_files = { filetypes = { "png", "webp", "jpg", "jpeg" } } },
   })
 
   vim.keymap.set("n", "<leader>f", require("telescope.builtin").find_files, {
     silent = true,
     desc = "Find files",
   })
+  telescope.load_extension("luasnip")
+  telescope.load_extension("media_files")
+  vim.keymap.set("n", "<leader>tl", function() telescope.extensions.luasnip.luasnip() end)
   vim.g.portable_telescope_initialized = 1
 end
 
