@@ -1,6 +1,57 @@
 local M = {}
 local config = require("portable.config")
 
+function M.python(code)
+  local cfg = config.need("tasks")
+  if not cfg then return nil end
+  local executable = cfg.python or "python3"
+  if not config.executable(executable) then return nil end
+  return vim.fn.system({ executable, "-c", code })
+end
+
+local function session_ready(executable, session, command)
+  if not (config.enabled("media") or config.enabled("calendar") or config.enabled("repl")) then
+    vim.notify("Session helpers: enable media, calendar or repl in nvim-local.lua", vim.log.levels.WARN)
+    return false
+  end
+  if type(session) ~= "string" or session == "" or type(command) ~= "string" then
+    vim.notify("Session helpers require an explicit target and command text", vim.log.levels.WARN)
+    return false
+  end
+  return config.executable(executable)
+end
+
+function M.send_tmux(session, command)
+  if not session_ready("tmux", session, command) then return end
+  if command == "\003" then return vim.system({ "tmux", "send-keys", "-t", session, "C-c" }) end
+  return vim.system({ "tmux", "send-keys", "-t", session, "-l", "--", command }, {}, vim.schedule_wrap(function(result)
+    if result.code == 0 then
+      vim.system({ "tmux", "send-keys", "-t", session, "Enter" })
+    else
+      vim.notify("Terminal-session send failed", vim.log.levels.ERROR)
+    end
+  end))
+end
+
+function M.send_screen(session, command)
+  if not session_ready("screen", session, command) then return end
+  return vim.system({ "screen", "-S", session, "-X", "stuff", "\r" .. command .. "\n" })
+end
+
+function M.render_scene(file, scene, callback)
+  local cfg = config.need("media", { "render_command" })
+  if not cfg then return end
+  local command = cfg.render_command(file, scene)
+  if config.executable(command[1]) then return vim.system(command, { text = true }, callback) end
+end
+
+function M.launch_player(video, monitor)
+  local cfg = config.need("media", { "player_command" })
+  if not cfg then return end
+  local command = cfg.player_command(video, monitor)
+  if config.executable(command[1]) then return vim.system(command) end
+end
+
 function M.tasks(markdown)
   local cfg = config.need("tasks", { markdown and "markdown" or "items" })
   if not cfg then return nil end
@@ -150,8 +201,6 @@ function M.render()
   end
   if not scene then vim.notify("No class definition found at cursor"); return end
   local file = vim.api.nvim_buf_get_name(0)
-  local command = cfg.render_command(file, scene)
-  if not config.executable(command[1]) then return end
   -- argv providers permit custom session/monitor/output policies without embedded shell interpolation.
   -- Repeating the source action interrupts the previous render/player, never unrelated sessions.
   M.render_generation = (M.render_generation or 0) + 1
@@ -159,16 +208,17 @@ function M.render()
   if M.render_job then M.render_job:kill(2) end
   if M.player_job then M.player_job:kill(2) end
   M.render_job, M.player_job = nil, nil
-  M.render_job = vim.system(command, { text = true }, vim.schedule_wrap(function(result)
+  M.render_job = M.render_scene(file, scene, vim.schedule_wrap(function(result)
     if generation ~= M.render_generation then return end
     M.render_job = nil
     if result.code ~= 0 then vim.notify("Scene render failed; player was not started", vim.log.levels.ERROR); return end
-    local player = cfg.player_command(cfg.video_path(file, scene))
-    if config.executable(player[1]) then M.player_job = vim.system(player) end
+    M.player_job = M.launch_player(cfg.video_path(file, scene))
   end))
 end
 
 function M.setup()
+  _G.RunPythonCode, _G.SendToTmux, _G.SendToScreen = M.python, M.send_tmux, M.send_screen
+  _G.ManimRender, _G.LaunchMpv = M.render_scene, M.launch_player
   _G.GetTodoList = function() return M.tasks(false) end
   _G.GetTodoMarkdown = function() return M.tasks(true) end
   _G.PopulateQuickfixList, _G.DisplayTodoMarkdown = M.quickfix, M.task_float

@@ -212,8 +212,10 @@ require("portable.workflows").remote("up")
 require("portable.workflows").blocks("")
 require("portable.workflows").tasks(false)
 require("portable.repl").start()
+SendToTmux("fixture", "text"); SendToScreen("fixture", "text")
+ManimRender("fixture.py", "Demo"); LaunchMpv("fixture.mp4", 1); RunPythonCode("print(1)")
 vim.cmd("Octo issue list"); vim.cmd("Copilot status"); vim.cmd("Rg")
-check(effects == 0 and #notifications >= 9, "unconfigured integrations must diagnose without effects")
+check(effects == 0 and #notifications >= 14, "unconfigured integrations must diagnose without effects")
 
 -- Configured provider and argument-boundary proof, using synthetic data only.
 config.options.tasks = { enabled = true, items = function() return { "fixture.txt:2:example", "", "broken", "second.txt:3:second" } end,
@@ -235,6 +237,32 @@ config.options.calendar = { enabled = true, format_timestamp = function(epoch) r
 local now = os.time()
 local rounded = require("portable.workflows").timestamp(3600)
 check(rounded >= now + 3600 and rounded <= now + 4500 and rounded % 900 == 0, "calendar quarter-hour rounding")
+
+-- Callable source helper entrypoints share the same opted-in argv implementations.
+config.options.media = {
+  enabled = true,
+  render_command = function(file, scene) return { "renderer", file, scene } end,
+  player_command = function(video, monitor) return { "player", video, tostring(monitor) } end,
+}
+local helper_calls = {}
+vim.system = function(args, _, callback)
+  table.insert(helper_calls, args)
+  if callback then callback({ code = 0 }) end
+  return {}
+end
+SendToTmux("fixture", 'echo "$(literal)"')
+check(vim.wait(1000, function() return #helper_calls == 2 end), "tmux text then Enter ordering")
+check(helper_calls[1][5] == "-l" and helper_calls[1][7] == 'echo "$(literal)"' and helper_calls[2][5] == "Enter", "literal tmux argv")
+SendToTmux("fixture", "\003")
+check(helper_calls[3][5] == "C-c", "tmux interrupt key")
+SendToScreen("fixture", "text")
+check(helper_calls[4][6] == "\rtext\n", "screen argv and framing")
+ManimRender("scene file.py", "Demo"); LaunchMpv("video file.mp4", 2)
+check(helper_calls[5][2] == "scene file.py" and helper_calls[6][3] == "2", "render/player callable helpers")
+local python_system, python_args = vim.fn.system
+vim.fn.system = function(args) python_args = args; return "fixture" end
+check(RunPythonCode("print(1)") == "fixture" and python_args[2] == "-c" and python_args[3] == "print(1)", "configured Python helper")
+vim.fn.system = python_system
 
 -- Account setup tables and Ctrl-J precedence: pack/network setup is deliberately stubbed.
 local cmd, load_extension = vim.cmd, require("telescope").load_extension
