@@ -42,14 +42,19 @@ check(#ts.get_ensure_installed_parsers() == 0, "implicit parser provisioning")
 local python = fresh("python")
 check(vim.bo.expandtab, "stock Python indentation override")
 check(map("m").buffer == 1 and map("m").rhs:find("Pythonsense", 1, true), "Python function motion")
-check(map(" _").buffer == 1 and map(" mv").buffer == 1, "Python helpers must be buffer local")
+check(map(" _").buffer == 1, "Python docstring helper must be buffer local")
+-- Scene rendering was removed, not disabled or retained behind compatibility stubs.
+local workflows = require("portable.workflows")
+check(workflows.render == nil and workflows.render_scene == nil, "removed scene implementation")
+check(_G.ManimRender == nil and _G.RenderAndWatchCurrentScene == nil, "removed scene entrypoints")
+check(next(map(" mv")) == nil, "removed Python scene mapping")
 vim.api.nvim_buf_set_lines(0, 0, -1, false, { "def first():", "    pass", "", "def second():", "    pass" })
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
 vim.cmd("normal m")
 check(vim.api.nvim_win_get_cursor(0)[1] == 4, "real Python next-function motion")
 
 vim.bo.filetype = "text"
-check(map(" mv").buffer ~= 1 and map("m").buffer ~= 1, "Python mapping leaked after filetype change")
+check(map(" _").buffer ~= 1 and map("m").buffer ~= 1, "Python mapping leaked after filetype change")
 for _, ft in ipairs({ "c", "cpp", "cuda", "c" }) do
   fresh(ft)
   for key, rhs in pairs({ md = ":Make!<CR>", mc = ":Make! clean<CR>", mr = ":Make! run<CR>", me = ":Copen<CR>" }) do
@@ -207,15 +212,14 @@ local notify, system = vim.notify, vim.system
 vim.notify = function(message) table.insert(notifications, message) end
 vim.system = function() effects = effects + 1; error("unexpected external action") end
 require("portable.workflows").current_event()
-require("portable.workflows").render()
 require("portable.workflows").remote("up")
 require("portable.workflows").blocks("")
 require("portable.workflows").tasks(false)
 require("portable.repl").start()
 SendToTmux("fixture", "text"); SendToScreen("fixture", "text")
-ManimRender("fixture.py", "Demo"); LaunchMpv("fixture.mp4", 1); RunPythonCode("print(1)")
+LaunchMpv("fixture.mp4", 1); RunPythonCode("print(1)")
 vim.cmd("Octo issue list"); vim.cmd("Copilot status"); vim.cmd("Rg")
-check(effects == 0 and #notifications >= 14, "unconfigured integrations must diagnose without effects")
+check(effects == 0 and #notifications >= 12, "unconfigured integrations must diagnose without effects")
 
 -- Configured provider and argument-boundary proof, using synthetic data only.
 config.options.tasks = { enabled = true, items = function() return { "fixture.txt:2:example", "", "broken", "second.txt:3:second" } end,
@@ -241,7 +245,6 @@ check(rounded >= now + 3600 and rounded <= now + 4500 and rounded % 900 == 0, "c
 -- Callable source helper entrypoints share the same opted-in argv implementations.
 config.options.media = {
   enabled = true,
-  render_command = function(file, scene) return { "renderer", file, scene } end,
   player_command = function(video, monitor) return { "player", video, tostring(monitor) } end,
 }
 local helper_calls = {}
@@ -257,8 +260,8 @@ SendToTmux("fixture", "\003")
 check(helper_calls[3][5] == "C-c", "tmux interrupt key")
 SendToScreen("fixture", "text")
 check(helper_calls[4][6] == "\rtext\n", "screen argv and framing")
-ManimRender("scene file.py", "Demo"); LaunchMpv("video file.mp4", 2)
-check(helper_calls[5][2] == "scene file.py" and helper_calls[6][3] == "2", "render/player callable helpers")
+LaunchMpv("video file.mp4", 2)
+check(helper_calls[5][1] == "player" and helper_calls[5][2] == "video file.mp4" and helper_calls[5][3] == "2", "standalone player argv helper")
 local python_system, python_args = vim.fn.system
 vim.fn.system = function(args) python_args = args; return "fixture" end
 check(RunPythonCode("print(1)") == "fixture" and python_args[2] == "-c" and python_args[3] == "print(1)", "configured Python helper")

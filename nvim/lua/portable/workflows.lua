@@ -38,13 +38,6 @@ function M.send_screen(session, command)
   return vim.system({ "screen", "-S", session, "-X", "stuff", "\r" .. command .. "\n" })
 end
 
-function M.render_scene(file, scene, callback)
-  local cfg = config.need("media", { "render_command" })
-  if not cfg then return end
-  local command = cfg.render_command(file, scene)
-  if config.executable(command[1]) then return vim.system(command, { text = true }, callback) end
-end
-
 function M.launch_player(video, monitor)
   local cfg = config.need("media", { "player_command" })
   if not cfg then return end
@@ -185,45 +178,13 @@ function M.remote(direction)
   end))
 end
 
-function M.render()
-  local cfg = config.need("media", { "render_command", "video_path", "player_command" })
-  if not cfg or not config.parser("python") then return end
-  local node = vim.treesitter.get_node()
-  local scene
-  while node do
-    if node:type() == "class_definition" then
-      for child in node:iter_children() do
-        if child:type() == "identifier" then scene = vim.treesitter.get_node_text(child, 0); break end
-      end
-      break
-    end
-    node = node:parent()
-  end
-  if not scene then vim.notify("No class definition found at cursor"); return end
-  local file = vim.api.nvim_buf_get_name(0)
-  -- argv providers permit custom session/monitor/output policies without embedded shell interpolation.
-  -- Repeating the source action interrupts the previous render/player, never unrelated sessions.
-  M.render_generation = (M.render_generation or 0) + 1
-  local generation = M.render_generation
-  if M.render_job then M.render_job:kill(2) end
-  if M.player_job then M.player_job:kill(2) end
-  M.render_job, M.player_job = nil, nil
-  M.render_job = M.render_scene(file, scene, vim.schedule_wrap(function(result)
-    if generation ~= M.render_generation then return end
-    M.render_job = nil
-    if result.code ~= 0 then vim.notify("Scene render failed; player was not started", vim.log.levels.ERROR); return end
-    M.player_job = M.launch_player(cfg.video_path(file, scene))
-  end))
-end
-
 function M.setup()
   _G.RunPythonCode, _G.SendToTmux, _G.SendToScreen = M.python, M.send_tmux, M.send_screen
-  _G.ManimRender, _G.LaunchMpv = M.render_scene, M.launch_player
+  _G.LaunchMpv = M.launch_player
   _G.GetTodoList = function() return M.tasks(false) end
   _G.GetTodoMarkdown = function() return M.tasks(true) end
   _G.PopulateQuickfixList, _G.DisplayTodoMarkdown = M.quickfix, M.task_float
   _G.GotoCurrentEvent, _G.GetTimeWithOffset, _G.SyncOrgCal = M.current_event, M.timestamp, M.sync_calendar
-  _G.RenderAndWatchCurrentScene = M.render
   vim.keymap.set("n", "<leader>t", function() M.quickfix(M.tasks(false)) end)
   vim.keymap.set("n", "<leader>T", M.task_float)
   vim.keymap.set("n", "<leader><leader>n", M.current_event)

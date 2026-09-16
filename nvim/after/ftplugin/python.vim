@@ -18,8 +18,6 @@ map <buffer> g: <Plug>(PythonsensePyWhere)[
 
 nmap <buffer> <silent> <leader>_ <Plug>(pydocstring)
 
-
-nnoremap <buffer> <silent> <leader>mv <Cmd>lua RenderAndWatchCurrentScene()<CR>
 let b:undo_ftplugin = get(b:, "undo_ftplugin", "")
 let b:undo_ftplugin .= " | silent! execute \'unmap <buffer> ac\'"
 let b:undo_ftplugin .= " | silent! execute \'unmap <buffer> ic\'"
@@ -37,4 +35,3 @@ let b:undo_ftplugin .= " | silent! execute \'unmap <buffer> [m\'"
 let b:undo_ftplugin .= " | silent! execute \'unmap <buffer> M\'"
 let b:undo_ftplugin .= " | silent! execute \'unmap <buffer> g:\'"
 let b:undo_ftplugin .= " | silent! execute \'nunmap <buffer> <leader>_\'"
-let b:undo_ftplugin .= " | silent! execute \'nunmap <buffer> <leader>mv\'"

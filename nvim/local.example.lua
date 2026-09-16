@@ -40,10 +40,8 @@ return {
   },
   media = {
     enabled = false,
-    -- render_command = function(file, scene) return { "manim", "render", file, scene } end,
-    -- video_path = function(file, scene) return your_output_path end,
     -- player_command = function(video) return { "mpv", "--loop-file=inf", "--", video } end,
-    -- Providers can select local sessions/monitors/output layouts; no shell concatenation is required.
+    -- The player provider can select local playback/monitor options without shell concatenation.
   },
   remote_sync = {
     enabled = false,
